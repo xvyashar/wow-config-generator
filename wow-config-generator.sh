@@ -271,8 +271,8 @@ generate_config() {
 		"tag": "select",
 		"outbounds": [
 			"auto",
-			"'$CONFIG_TAG'",
-			"'$CONFIG_TAG'"
+			"Iran - '$CONFIG_TAG'",
+			"Main - '$CONFIG_TAG'"
 		],
 		"default": "auto"
 		},
@@ -280,15 +280,15 @@ generate_config() {
 		"type": "urltest",
 		"tag": "auto",
 		"outbounds": [
-			"'$CONFIG_TAG'",
-			"'$CONFIG_TAG'"
+			"Iran - '$CONFIG_TAG'",
+			"Main - '$CONFIG_TAG'"
 		],
 		"url": "http://cp.cloudflare.com/",
 		"interval": "10m0s"
 		},
 		{
 		"type": "wireguard",
-		"tag": "'$CONFIG_TAG'",
+		"tag": "Main - '$CONFIG_TAG'",
 		"local_address": [
 			"172.16.0.2/32",
 			"'$first_public_key'"
@@ -303,8 +303,8 @@ generate_config() {
 		},
 		{
 		"type": "wireguard",
-		"tag": "'$CONFIG_TAG'",
-		"detour": "'$CONFIG_TAG'",
+		"tag": "Iran - '$CONFIG_TAG'",
+		"detour": "Main - '$CONFIG_TAG'",
 		"local_address": [
 			"172.16.0.2/32",
 			"'$second_public_key'"
