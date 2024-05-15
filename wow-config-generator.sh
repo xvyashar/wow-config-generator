@@ -8,11 +8,18 @@ BLUE='\033[0;34m'
 PURPLE='\033[0;35m'
 CYAN='\033[0;36m'
 WHITE='\033[0;37m'
+
+BOLD='\033[1m'
+UNDERLINE='\033[4m'
 NC='\033[0m' # no-color
 
 # Ask config tag
-echo -e "${YELLOW}---------- Wow Config Generator ----------${NC}"
-read -p "? Define a tag for your config:" CONFIG_TAG
+echo -e "${YELLOW}:::::::::::::::::::::::::::::::::::::::::::${NC}"
+echo -e "${YELLOW}.......... Wow Config Generator ...........${NC}"
+echo -e "${YELLOW}............ Author: ${UNDERLINE}xvyashar${YELLOW} .............${NC}"
+echo -e "${YELLOW}... Github: https://github.com/xvyashar ...${NC}"
+echo -e "${YELLOW}:::::::::::::::::::::::::::::::::::::::::::${WHITE}${BOLD}"
+read -p "? Define a tag for your config:" config_tag
 
 # Detect CPU architecture
 case "$(uname -m)" in
@@ -34,12 +41,13 @@ case "$(uname -m)" in
 	;;
 esac
 
+# Download warp ip scanner bin
 download_warpendpoint() {
     if [[ ! -f "$PREFIX/bin/warpendpoint" ]]; then
-	clear
+		clear
         echo -e "${YELLOW}- Downloading warpendpoint program...${NC}"
-        
-	if [[ -n $cpu ]]; then
+
+		if [[ -n $cpu ]]; then
             curl -L -o warpendpoint -# --retry 2 https://raw.githubusercontent.com/Ptechgithub/warp/main/endip/$cpu > /dev/null 2>&1
             cp warpendpoint $PREFIX/bin > /dev/null 2>&1
             chmod +x $PREFIX/bin/warpendpoint > /dev/null 2>&1
@@ -49,6 +57,7 @@ download_warpendpoint() {
     fi
 }
 
+# Generate Random IPv4s
 generate_random_ipv4s(){
 	n=0
 	ip_count=100
@@ -154,23 +163,33 @@ generate_random_ipv4s(){
 	echo -e "${BLUE}- Done!${NC}"
 }
 
+# Get 2 free Cloudflare accounts
 get_first_cloudflare_account(){
 	echo -e "${YELLOW}- Getting first free Cloudflare account...${NC}"
 
-	output=$(curl -sL "https://api.zeroteam.top/warp?format=sing-box" | grep -Eo --color=never '"2606:4700:[0-9a-f:]+/128"|"private_key":"[0-9a-zA-Z\/+]+="|"reserved":\[[0-9]+(,[0-9]+){2}\]')
-	first_public_key=$(echo "$output" | grep -oP '("2606:4700:[0-9a-f:]+/128")' | tr -d '"')
+	output=$(curl -sL "https://api.zeroteam.top/warp?format=sing-box" | grep -Eo --color=never '"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+"|"2606:4700:[0-9a-f:]+/128"|"private_key":"[0-9a-zA-Z\/+]+="|"peer_public_key":"[0-9a-zA-Z\/+]+="|"reserved":\[[0-9]+(,[0-9]+){2}\]|"mtu":[0-9]+')
+	first_v4_address=$(echo "$output" | grep -oP '("[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+")' | tr -d '"')
+	first_v6_address=$(echo "$output" | grep -oP '("2606:4700:[0-9a-f:]+/128")' | tr -d '"')
 	first_private_key=$(echo "$output" | grep -oP '("private_key":"[0-9a-zA-Z\/+]+=")' | cut -d':' -f2 | tr -d '"')
+	first_peer_public_key=$(echo "$output" | grep -oP '("peer_public_key":"[0-9a-zA-Z\/+]+=")' | cut -d':' -f2 | tr -d '"')
 	first_reserved=$(echo "$output" | grep -oP '(\[[0-9]+(,[0-9]+){2}\])' | tr -d '"' | sed 's/"reserved"://')
+	first_mtu=$(echo "$output" | grep -oP '("mtu":[0-9]+)' | cut -d':' -f2 | tr -d '"')
+
+	echo -e "${CYAN}- ${first_v6_address} --> ${first_private_key}${NC}"
 }
 get_second_cloudflare_account(){
 	echo -e "${YELLOW}- Getting second free Cloudflare account...${NC}"
 	
-	output=$(curl -sL "https://api.zeroteam.top/warp?format=sing-box" | grep -Eo --color=never '"2606:4700:[0-9a-f:]+/128"|"private_key":"[0-9a-zA-Z\/+]+="|"reserved":\[[0-9]+(,[0-9]+){2}\]')
-	second_public_key=$(echo "$output" | grep -oP '("2606:4700:[0-9a-f:]+/128")' | tr -d '"')
+	output=$(curl -sL "https://api.zeroteam.top/warp?format=sing-box" | grep -Eo --color=never '"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+"|"2606:4700:[0-9a-f:]+/128"|"private_key":"[0-9a-zA-Z\/+]+="|"peer_public_key":"[0-9a-zA-Z\/+]+="|"reserved":\[[0-9]+(,[0-9]+){2}\]|"mtu":[0-9]+')
+	second_v4_address=$(echo "$output" | grep -oP '("[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/[0-9]+")' | tr -d '"')
+	second_v6_address=$(echo "$output" | grep -oP '("2606:4700:[0-9a-f:]+/128")' | tr -d '"')
 	second_private_key=$(echo "$output" | grep -oP '("private_key":"[0-9a-zA-Z\/+]+=")' | cut -d':' -f2 | tr -d '"')
+	second_peer_public_key=$(echo "$output" | grep -oP '("peer_public_key":"[0-9a-zA-Z\/+]+=")' | cut -d':' -f2 | tr -d '"')
 	second_reserved=$(echo "$output" | grep -oP '(\[[0-9]+(,[0-9]+){2}\])' | tr -d '"' | sed 's/"reserved"://')
+	second_mtu=$(echo "$output" | grep -oP '("mtu":[0-9]+)' | cut -d':' -f2 | tr -d '"')
 
-	echo -e "${BLUE}- Done!"
+	echo -e "${CYAN}- ${second_v6_address} --> ${second_private_key}${NC}"
+	echo -e "${BLUE}- Done!${NC}"
 }
 
 manage_result() {
@@ -219,124 +238,127 @@ manage_result() {
 generate_config() {
     echo -e "${YELLOW}- Generating Config..."
 
+	# Move ipv4s to file that warpendpoint can read it 
     echo ${ip_list[@]} | sed -e 's/ /\n/g' | sort -u > ip.txt
     ulimit -n 102400
     chmod +x warpendpoint > /dev/null 2>&1
 
-    if command -v warpendpoint &>/dev/null; then
+	# Run warpendpoint from local or bin executable
+    if command -v warpendpoint > /dev/null 2>&1; then
         warpendpoint > /dev/null 2>&1
     else
         ./warpendpoint > /dev/null 2>&1
     fi
     
+	# Get server ip address & port from result of warpendpoint
     found_set=$(cat result.csv | grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+" | head -n 1)
-	ipv4="${found_set%:*}"
+	server="${found_set%:*}"
 	port="${found_set##*:}"
     
 	get_first_cloudflare_account
 	get_second_cloudflare_account
 
-	template='{
-	"route": {
-		"geoip": {
-		"path": "geo-assets\\sagernet-sing-geoip-geoip.db"
+	json_config='{
+		"route": {
+			"geoip": {
+			"path": "geo-assets\\sagernet-sing-geoip-geoip.db"
+			},
+			"geosite": {
+			"path": "geo-assets\\sagernet-sing-geosite-geosite.db"
+			},
+			"rules": [
+			{
+				"inbound": "dns-in",
+				"outbound": "dns-out"
+			},
+			{
+				"port": 53,
+				"outbound": "dns-out"
+			},
+			{
+				"clash_mode": "Direct",
+				"outbound": "direct"
+			},
+			{
+				"clash_mode": "Global",
+				"outbound": "select"
+			}
+			],
+			"auto_detect_interface": true,
+			"override_android_vpn": true
 		},
-		"geosite": {
-		"path": "geo-assets\\sagernet-sing-geosite-geosite.db"
-		},
-		"rules": [
-		{
-			"inbound": "dns-in",
-			"outbound": "dns-out"
-		},
-		{
-			"port": 53,
-			"outbound": "dns-out"
-		},
-		{
-			"clash_mode": "Direct",
-			"outbound": "direct"
-		},
-		{
-			"clash_mode": "Global",
-			"outbound": "select"
-		}
-		],
-		"auto_detect_interface": true,
-		"override_android_vpn": true
-	},
-	"outbounds": [
-		{
-		"type": "selector",
-		"tag": "select",
 		"outbounds": [
-			"auto",
-			"Iran - '$CONFIG_TAG'",
-			"Main - '$CONFIG_TAG'"
-		],
-		"default": "auto"
-		},
-		{
-		"type": "urltest",
-		"tag": "auto",
-		"outbounds": [
-			"Iran - '$CONFIG_TAG'",
-			"Main - '$CONFIG_TAG'"
-		],
-		"url": "http://cp.cloudflare.com/",
-		"interval": "10m0s"
-		},
-		{
-		"type": "wireguard",
-		"tag": "Main - '$CONFIG_TAG'",
-		"local_address": [
-			"172.16.0.2/32",
-			"'$first_public_key'"
-		],
-		"private_key": "'$first_private_key'",
-		"server": "'$ipv4'",
-		"server_port": '$port',
-		"peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-		"reserved": '$first_reserved',
-		"mtu": 1280,
-		"fake_packets": "5-10"
-		},
-		{
-		"type": "wireguard",
-		"tag": "Iran - '$CONFIG_TAG'",
-		"detour": "Main - '$CONFIG_TAG'",
-		"local_address": [
-			"172.16.0.2/32",
-			"'$second_public_key'"
-		],
-		"private_key": "'$second_private_key'",
-		"server": "'$ipv4'",
-		"server_port": '$port',
-		"peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
-		"reserved": '$second_reserved',
-		"mtu": 1280,
-		"fake_packets": "5-10"
-		},
-		{
-		"type": "dns",
-		"tag": "dns-out"
-		},
-		{
-		"type": "direct",
-		"tag": "direct"
-		},
-		{
-		"type": "direct",
-		"tag": "bypass"
-		},
-		{
-		"type": "block",
-		"tag": "block"
-		}
-	]  
+			{
+			"type": "selector",
+			"tag": "select",
+			"outbounds": [
+				"auto",
+				"[1] - '$config_tag'",
+				"[2] - '$config_tag'"
+			],
+			"default": "auto"
+			},
+			{
+			"type": "urltest",
+			"tag": "auto",
+			"outbounds": [
+				"[1] - '$config_tag'",
+				"[2] - '$config_tag'"
+			],
+			"url": "http://cp.cloudflare.com/",
+			"interval": "10m0s"
+			},
+			{
+			"type": "wireguard",
+			"tag": "[1] - '$config_tag'",
+			"local_address": [
+				"'$first_v4_address'",
+				"'$first_v6_address'"
+			],
+			"private_key": "'$first_private_key'",
+			"server": "'$server'",
+			"server_port": '$port',
+			"peer_public_key": "'$first_peer_public_key'",
+			"reserved": '$first_reserved',
+			"mtu": '$first_mtu',
+			"fake_packets": "5-10"
+			},
+			{
+			"type": "wireguard",
+			"tag": "[2] - '$config_tag'",
+			"detour": "[1] - '$config_tag'",
+			"local_address": [
+				"'$second_v4_address'",
+				"'$second_v6_address'"
+			],
+			"private_key": "'$second_private_key'",
+			"server": "'$server'",
+			"server_port": '$port',
+			"peer_public_key": "'$second_peer_public_key'",
+			"reserved": '$second_reserved',
+			"mtu": '$second_mtu',
+			"fake_packets": "5-10"
+			},
+			{
+			"type": "dns",
+			"tag": "dns-out"
+			},
+			{
+			"type": "direct",
+			"tag": "direct"
+			},
+			{
+			"type": "direct",
+			"tag": "bypass"
+			},
+			{
+			"type": "block",
+			"tag": "block"
+			}
+		]  
 	}'
 
-    manage_result "$template"
+    manage_result "$json_config"
 
     rm warpendpoint > /dev/null 2>&1
     rm -rf ip.txt
