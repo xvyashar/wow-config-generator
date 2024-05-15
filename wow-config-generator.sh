@@ -42,7 +42,7 @@ case "$(uname -m)" in
 esac
 
 # Download warp ip scanner bin
-download_warpendpoint() {
+download_warp_scanner() {
     if [[ ! -f "$PREFIX/bin/warpendpoint" ]]; then
 		clear
         echo -e "${YELLOW}- Downloading warpendpoint program...${NC}"
@@ -236,7 +236,7 @@ manage_result() {
 }
 
 generate_config() {
-    echo -e "${YELLOW}- Generating Config..."
+    echo -e "${YELLOW}- Generating config...${NC}"
 
 	# Move ipv4s to file that warpendpoint can read it 
     echo ${ip_list[@]} | sed -e 's/ /\n/g' | sort -u > ip.txt
@@ -366,6 +366,6 @@ generate_config() {
     exit
 }
 
-download_warpendpoint
+download_warp_scanner
 generate_random_ipv4s
 generate_config
